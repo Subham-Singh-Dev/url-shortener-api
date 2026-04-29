@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'shortener',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -127,5 +128,15 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ]
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'URL Shortener API',
+    'DESCRIPTION': 'REST API for URL shortening with click analytics.',
+    'VERSION': '1.0.0',
 }
      
