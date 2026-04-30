@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwiftURL — URL Shortener</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 60px 20px;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .tagline {
+            color: #64748b;
+            font-size: 1rem;
+            margin-bottom: 48px;
+        }
+
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 32px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 0;
+        }
+
+        input[type="url"] {
+            flex: 1;
+            padding: 14px 18px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            color: #e2e8f0;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="url"]:focus {
+            border-color: #3b82f6;
+        }
+
+        input[type="url"]::placeholder { color: #475569; }
+
+        button {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+
+        button:hover { opacity: 0.9; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .result {
+            display: none;
+            margin-top: 24px;
+            padding: 20px;
+            background: #0f172a;
+            border: 1px solid #1d4ed8;
+            border-radius: 10px;
+        }
+
+        .result.show { display: block; }
+
+        .result-label {
+            font-size: 0.8rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .short-url {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #60a5fa;
+            text-decoration: none;
+            word-break: break-all;
+        }
+
+        .short-url:hover { text-decoration: underline; }
+
+        .copy-btn {
+            margin-top: 12px;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            background: #1d4ed8;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+            font-size: 0.82rem;
+            color: #64748b;
+        }
+
+        .error-msg {
+            display: none;
+            margin-top: 16px;
+            padding: 12px 16px;
+            background: #1e0a0a;
+            border: 1px solid #dc2626;
+            border-radius: 8px;
+            color: #f87171;
+            font-size: 0.9rem;
+        }
+
+        .error-msg.show { display: block; }
+
+        .history-section h3 {
+            font-size: 1rem;
+            color: #94a3b8;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .history-item:last-child { border-bottom: none; }
+
+        .history-original {
+            font-size: 0.82rem;
+            color: #64748b;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .history-short {
+            font-size: 0.88rem;
+            color: #60a5fa;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .click-badge {
+            font-size: 0.75rem;
+            background: #1e3a5f;
+            color: #93c5fd;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-left: 8px;
+        }
+
+        .loading { display: none; }
+        .loading.show { display: inline; }
+    </style>
+</head>
+<body>
+    <div class="logo">SwiftURL</div>
+    <p class="tagline">Shorten links. Track clicks. Built with Django.</p>
+
+    <div class="card">
+        <div class="input-group">
+            <input
+                type="url"
+                id="urlInput"
+                placeholder="https://your-long-url.com/paste-here"
+                onkeydown="if(event.key==='Enter') shortenURL()"
+            />
+            <button onclick="shortenURL()" id="shortenBtn">
+                Shorten
+            </button>
+        </div>
+
+        <div class="error-msg" id="errorMsg"></div>
+
+        <div class="result" id="result">
+            <div class="result-label">Your Short URL</div>
+            <a class="short-url" id="shortUrl" href="#" target="_blank"></a>
+            <br>
+            <button class="copy-btn" onclick="copyURL()">Copy Link</button>
+            <div class="stats-row">
+                <span id="clickCount">0 clicks</span>
+                <span>•</span>
+                <span id="createdAt"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card history-section">
+        <h3>Recent Links</h3>
+        <div id="historyList">
+            <p style="color: #475569; font-size: 0.9rem;">
+                No links yet. Shorten your first URL above.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const BASE = window.location.origin;
+        let currentShortUrl = '';
+
+        async function shortenURL() {
+            const input = document.getElementById('urlInput');
+            const url = input.value.trim();
+            const btn = document.getElementById('shortenBtn');
+            const errorMsg = document.getElementById('errorMsg');
+            const result = document.getElementById('result');
+
+            errorMsg.classList.remove('show');
+            result.classList.remove('show');
+
+            if (!url) {
+                showError('Please enter a URL');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Shortening...';
+
+            try {
+                const response = await fetch(`${BASE}/api/shorten/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ original_url: url })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showError(data.error || data.original_url?.[0] || 'Something went wrong');
+                    return;
+                }
+
+                const shortUrl = `${BASE}/${data.short_code}`;
+                currentShortUrl = shortUrl;
+
+                document.getElementById('shortUrl').href = shortUrl;
+                document.getElementById('shortUrl').textContent = shortUrl;
+                document.getElementById('clickCount').textContent = `${data.click_count} clicks`;
+                document.getElementById('createdAt').textContent = 
+                    new Date(data.created_at).toLocaleDateString('en-IN');
+
+                result.classList.add('show');
+                input.value = '';
+                loadHistory();
+
+            } catch (err) {
+                showError('Network error. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Shorten';
+            }
+        }
+
+        function showError(msg) {
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.textContent = msg;
+            errorMsg.classList.add('show');
+        }
+
+        function copyURL() {
+            navigator.clipboard.writeText(currentShortUrl).then(() => {
+                const btn = event.target;
+                btn.textContent = 'Copied!';
+                setTimeout(() => btn.textContent = 'Copy Link', 2000);
+            });
+        }
+
+        async function loadHistory() {
+            try {
+                const response = await fetch(`${BASE}/api/urls/`);
+                const data = await response.json();
+                const list = document.getElementById('historyList');
+
+                if (!data.urls || data.urls.length === 0) {
+                    list.innerHTML = '<p style="color:#475569;font-size:0.9rem">No links yet.</p>';
+                    return;
+                }
+
+                list.innerHTML = data.urls.slice(0, 8).map(url => `
+                    <div class="history-item">
+                        <div>
+                            <div class="history-original">${url.original_url}</div>
+                            <a class="history-short" href="${BASE}/${url.short_code}" target="_blank">
+                                ${BASE}/${url.short_code}
+                            </a>
+                            <span class="click-badge">${url.click_count} clicks</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error('Failed to load history');
+            }
+        }
+
+        // Load history on page open
+        loadHistory();
+    </script>
+</body>
+</html>

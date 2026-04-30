@@ -112,3 +112,11 @@ class TopURLsView(APIView):
             context={'request': request}
         )
         return Response(serializer.data)
+
+def home_view(request):
+    """
+    GET /
+    Renders the landing page template.
+    """
+    return render(request, 'shortener/index.html')
+
