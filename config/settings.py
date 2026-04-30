@@ -30,7 +30,7 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,.railway.app").split(",")
 
 
-This allows Railway's dynamic domains
+# This allows Railway's dynamic domains
 CSRF_TRUSTED_ORIGINS = [
     "https://*.railway.app",
     "http://localhost:8000"
