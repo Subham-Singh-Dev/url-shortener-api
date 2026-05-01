@@ -39,8 +39,8 @@ class ShortenURLView(APIView):
 
     def get(self, request):
         """
-        GET /api/shorten/
-        Returns all shortened URLs — paginated in future.
+        GET /api/urls/
+        Returns all shortened URLs wrapped in a dictionary for the test suite.
         """
         urls = URL.objects.filter(is_active=True)
         serializer = URLCreateSerializer(
@@ -48,7 +48,10 @@ class ShortenURLView(APIView):
             many=True,
             context={'request': request}
         )
-        return Response(serializer.data)
+        return Response({
+            'urls': serializer.data,
+            'count': urls.count()
+        })
 
 
 class RedirectView(APIView):
