@@ -56,19 +56,19 @@ class TestRedirect:
 
     def test_valid_redirect(self, client, sample_url):
         """Valid short_code redirects to original URL"""
-        response = client.get(f'/api/{sample_url.short_code}/')
+        response = client.get(f'/{sample_url.short_code}/')
         assert response.status_code == 302
         assert response['Location'] == sample_url.original_url
 
     def test_redirect_logs_click(self, client, sample_url):
         """Each redirect creates a Click record"""
-        client.get(f'/api/{sample_url.short_code}/')
+        client.get(f'/{sample_url.short_code}/')
         assert Click.objects.filter(url=sample_url).count() == 1
 
     def test_redirect_increments_counter(self, client, sample_url):
         """click_count increments on each redirect"""
-        client.get(f'/api/{sample_url.short_code}/')
-        client.get(f'/api/{sample_url.short_code}/')
+        client.get(f'/{sample_url.short_code}/')
+        client.get(f'/{sample_url.short_code}/')
         sample_url.refresh_from_db()
         assert sample_url.click_count == 2
 
