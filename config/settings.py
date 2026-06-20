@@ -27,7 +27,11 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-local-only')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,.railway.app", ".onrender.com").split(",")
+ALLOWED_HOSTS = [
+    h.strip() for h in os.environ.get(
+        "ALLOWED_HOSTS", "localhost,127.0.0.1,.railway.app,.onrender.com"
+    ).split(",") if h.strip()
+]
 
 
 #This allows Railway's dynamic domains
