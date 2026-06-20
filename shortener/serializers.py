@@ -20,8 +20,8 @@ class URLCreateSerializer(serializers.ModelSerializer):
     def get_short_url(self, obj):
         request = self.context.get('request')
         if request:
-            return request.build_absolute_uri(f'/r/{obj.short_code}/')
-        return f'/r/{obj.short_code}/'
+            return request.build_absolute_uri(f'/{obj.short_code}/')
+        return f'/{obj.short_code}/'
 
 
 class URLAnalyticsSerializer(serializers.ModelSerializer):
@@ -40,8 +40,8 @@ class URLAnalyticsSerializer(serializers.ModelSerializer):
     def get_short_url(self, obj):
         request = self.context.get('request')
         if request:
-            return request.build_absolute_uri(f'/r/{obj.short_code}/')
-        return f'/r/{obj.short_code}/'
+            return request.build_absolute_uri(f'/{obj.short_code}/')
+        return f'/{obj.short_code}/'
 
     def get_clicks_today(self, obj):
         from django.utils import timezone
